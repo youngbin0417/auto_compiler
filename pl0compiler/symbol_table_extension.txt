@@ -1,0 +1,10 @@
+struct {
+	char name[20];	/*변수 이름*/
+	int type;		/* 0-CONST	1-VARIABLE	2-PROCEDURE */
+	int lvl;	/*변수의 level*/
+	int offst;	/*offset 값*/
+	int dimension;	/*0-var	1-array*/
+	int length;		/*배열 길이*/
+	int link;		/*backward chain에 쓸 link*/
+	int param_count; /*매개변수 개수 (PROCEDURE에만 사용)*/
+} table[TBSIZE];
