@@ -89,13 +89,26 @@ void trace_execution(int pc, Instruction i) {
 		case Out: DEBUG_PRINT("OUT\n"); break;
 		default: DEBUG_PRINT("UNKNOWN %d\n", i.f); break;
 	}
+	
+	// 현재 프로그램 카운터와 스택 포인터 출력
+	DEBUG_PRINT("  PC=%d, SP=%d, MP=%d\n", pc, sp, mp);
+}
 }
 
 // 변수 값 모니터링을 위한 함수
 void monitor_variables() {
-	DEBUG_PRINT("Current stack state:\n");
+	DEBUG_PRINT("Current stack state (sp=%d, mp=%d):\n", sp, mp);
 	for (int i = 0; i <= sp; i++) {
-		DEBUG_PRINT("  s[%d] = %d\n", i, s[i]);
+		DEBUG_PRINT("  s[%d] = %d", i, s[i]);
+		// 활성 레코드 정보 출력
+		if (i == mp) {
+			DEBUG_PRINT(" (SL: %d)", s[i]);
+		} else if (i == mp + 1) {
+			DEBUG_PRINT(" (DL: %d)", s[i]);
+		} else if (i == mp + 2) {
+			DEBUG_PRINT(" (RA: %d)", s[i]);
+		}
+		DEBUG_PRINT("\n");
 	}
 	DEBUG_PRINT("\n");
 }
