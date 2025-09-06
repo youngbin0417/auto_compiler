@@ -1,0 +1,32 @@
+# Test cases for PL/0 grammar error detector
+
+# Test case 1: Missing semicolon in const declaration
+const n = 10
+var x, y
+
+begin
+  x := 5;
+  y := x + n
+end.
+
+# Test case 2: Unmatched begin/end
+procedure test;
+begin
+  x := 1
+end
+
+begin
+  call test;
+  if x = 1 then
+    begin
+      y := 2
+    { Missing end here }
+end.
+
+# Test case 3: Using keyword as identifier
+var begin, end;
+
+begin
+  begin := 1;
+  end := 2
+end.

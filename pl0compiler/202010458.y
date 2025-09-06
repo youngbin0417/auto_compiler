@@ -136,7 +136,7 @@ Statement: ID '[' Expression ']' {
         	Emit1("LDI", Ldi, 0, 0);
         	EmitOut("OUT", Out);
 	    } else {
-        	printf("Error: '%s' is not declared as an array.\n", $2);
+        	fprintf(stderr, "Error: '%s' is not declared as an array.\n", $2);
     	}
 }
 	| TWRITE ID		{ Lookup($2,VAR); Emit1("LOD", Lod, LDiff, OFFSET); EmitOut("OUT",Out); }
@@ -296,7 +296,7 @@ int HashFunction(char *name){
     return hash % HASHSIZE;
 }
 
-void Enter(char *name, int type, int lvl, int offst, int dimension, int length) {\n    int hashIndex = HashFunction(name); // 해시 버켓 인덱스\n    int idx = hashBucket[hashIndex];   // 해시 버켓에 담겨있는 심볼 테이블 인덱스\n\n    // 현재 레벨의 첫 심볼 인덱스 기록\n    if (leveltable[level] == -1) {\n        leveltable[level] = avail;\n    }\n\n    // 중복 심볼 검사\n    while (idx != -1) {\n        if (strcmp(table[idx].name, name) == 0 && table[idx].lvl == lvl) {\n            fprintf(stderr, "Error: Duplicate symbol '%s' at level %d\\n", name, lvl);\n            return;  // 중복 심볼 발견 시 추가하지 않고 종료\n        }\n        idx = table[idx].link;  // 다음 연결된 노드\n    }\n\n    // 심볼 테이블에 심볼 정보 저장\n    strcpy(table[avail].name, name);\n    table[avail].type = type;\n    table[avail].lvl = lvl;\n    table[avail].dimension = dimension;\n    table[avail].length = (dimension == 1) ? length : 0;\n    \n    // 배열일 경우 오프셋 처리 개선\n    if (dimension == 1) {\n        table[avail].offst = arrayBaseOffset;\n        arrayBaseOffset += length;  // 배열 크기만큼 오프셋 증가\n    } else {\n        table[avail].offst = offst;\n    }\n\n    // PROCEDURE인 경우 매개변수 개수 초기화\n    if (type == PROC) {\n        table[avail].param_count = 0;\n    }\n\n    // Backward Chain 설정\n    table[avail].link = hashBucket[hashIndex];  // 이전 심볼과 연결\n    hashBucket[hashIndex] = avail;             // 현재 심볼을 버킷의 맨 앞에 추가\n\n    ++avail;  // 다음 사용 가능한 인덱스로 이동\n}
+void Enter(char *name, int type, int lvl, int offst, int dimension, int length) {\n    int hashIndex = HashFunction(name); // 해시 버켓 인덱스\n    int idx = hashBucket[hashIndex];   // 해시 버켓에 담겨있는 심볼 테이블 인덱스\n\n    // 현재 레벨의 첫 심볼 인덱스 기록\n    if (leveltable[level] == -1) {\n        leveltable[level] = avail;\n    }\n\n    // 중복 심볼 검사\n    while (idx != -1) {\n        if (strcmp(table[idx].name, name) == 0 && table[idx].lvl == lvl) {\n            fprintf(stderr, \"Error: Duplicate symbol '%s' at level %d. Previous declaration was at line %d\\n\", \n                    name, lvl, table[idx].offst);  // Note: We could track line numbers in the symbol table for even better messages\n            return;  // 중복 심볼 발견 시 추가하지 않고 종료\n        }\n        idx = table[idx].link;  // 다음 연결된 노드\n    }\n\n    // 심볼 테이블에 심볼 정보 저장\n    strcpy(table[avail].name, name);\n    table[avail].type = type;\n    table[avail].lvl = lvl;\n    table[avail].dimension = dimension;\n    table[avail].length = (dimension == 1) ? length : 0;\n    \n    // 배열일 경우 오프셋 처리 개선\n    if (dimension == 1) {\n        table[avail].offst = arrayBaseOffset;\n        arrayBaseOffset += length;  // 배열 크기만큼 오프셋 증가\n        fprintf(stderr, \"Info: Array '%s' declared with offset %d and length %d\\n\", \n                name, table[avail].offst, length);\n    } else {\n        table[avail].offst = offst;\n    }\n\n    // PROCEDURE인 경우 매개변수 개수 초기화\n    if (type == PROC) {\n        table[avail].param_count = 0;\n    }\n\n    // Backward Chain 설정\n    table[avail].link = hashBucket[hashIndex];  // 이전 심볼과 연결\n    hashBucket[hashIndex] = avail;             // 현재 심볼을 버킷의 맨 앞에 추가\n\n    ++avail;  // 다음 사용 가능한 인덱스로 이동\n}
 
 
 void SetBlock() {
